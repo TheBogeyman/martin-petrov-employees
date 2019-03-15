@@ -1,0 +1,63 @@
+<html>
+<head>
+  <title>
+  Employee work duration
+  </title>
+  <meta charset="UTF-8"/>
+</head>
+<body>
+  <input type="file" id="file" />
+  <output id="employeeTable"></output>
+  <output id="employeeMax"></output>
+  <script>
+    function handleFile(e) {
+      let textFile = e.target.files;
+      let reader = new FileReader();
+      reader.onload = function(e) {
+        let employees=[];
+        let lines=e.target.result.split("\n");
+        lines.splice(lines.length-1, 1);
+        for (i in lines){
+          let strEmployees=lines[i].split(', ');
+          if(strEmployees[3]=='NULL'){
+            employees.push([Number(strEmployees[0]),Number(strEmployees[1]),new Date(strEmployees[2]),new Date()]);
+          }else{
+            employees.push([Number(strEmployees[0]),Number(strEmployees[1]),new Date(strEmployees[2]),new Date(strEmployees[3])]);
+          }
+        }
+        let coopTimes=[]
+        for(i in employees){
+          for (let i1 = Number(i)+Number(1); i1 < employees.length; i1++){
+            if((employees[i][1]==employees[i1][1])&&(employees[i][3]>=employees[i1][2])&&(employees[i][2]<=employees[i1][3])){
+              coopTimes.push([employees[i][0],employees[i1][0],employees[i][1],(Math.min(employees[i][3], employees[i1][3])-Math.max(employees[i][2], employees[i1][2]))/86400000])
+            }
+          }
+        }
+        let guiOutput = "<table border=1>";
+        for(let i=0; i<coopTimes.length; i++) {
+            guiOutput += "<tr>";
+            for(let i1=0; i1<coopTimes[i].length; i1++){
+                guiOutput += "<td>"+coopTimes[i][i1]+"</td>";
+            }
+            guiOutput += "</tr>";
+        }
+        guiOutput += "</table>";
+
+        document.getElementById('employeeTable').innerHTML =guiOutput;
+
+        let maxWorked=coopTimes[0];
+        for (i in coopTimes){
+          if(coopTimes[i][3]>maxWorked[3]){
+            maxWorked=coopTimes[i];
+          }
+        }
+      document.getElementById('employeeMax').innerHTML ='Employees '+maxWorked[0]+' and '+maxWorked[1]+' have worked together the most - '+maxWorked[3]+' days on project '+maxWorked[2];
+      }
+      reader.readAsText(textFile[0]);
+
+    }
+
+    document.getElementById('file').addEventListener('change', handleFile, false);
+  </script>
+</body>
+</html>
